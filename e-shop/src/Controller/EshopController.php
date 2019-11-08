@@ -8,6 +8,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\HandleTrait;
 use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Messenger\Transport\AmqpExt\AmqpStamp;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Message\Query\SearchQuery;
 
@@ -22,6 +23,7 @@ class EshopController extends AbstractController
 
     public function __construct(MessageBusInterface $messageBus)
     {
+
         $this->messageBus = $messageBus;
     }
 
@@ -53,15 +55,17 @@ class EshopController extends AbstractController
     /**
      * @Route("/signup-sms", name="signup-sms")
      */
-    public function signupSms()
+    public function SignUpSMS()
     {
-        $phoneNumber = '+37065454525';
-        //connect to api of external sms service provider
-        $this->messageBus->dispatch(new SignUpSms($phoneNumber));
+        $phoneNumber = '111 222 333 ';
+        $attributes = [];
+        $routingKey = ['sms1', 'sms2'];
+        $routingKey = $routingKey[random_int(0,1)];
+        $this->messageBus->dispatch(new SignUpSms($phoneNumber), [new AmqpStamp($routingKey, AMQP_NOPARAM, $attributes)]);
 
-        return new Response('Your phone number %s succesfully signed up to SMS newsletter! '. $phoneNumber );
-
+        return new Response(sprintf('Your phone number %s succesfully signed up to SMS newsletter!',$phoneNumber));
     }
+
 
     /**
      * @Route("/order", name="order")
